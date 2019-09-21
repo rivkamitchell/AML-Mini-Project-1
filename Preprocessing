@@ -22,3 +22,29 @@ with open('winequality-red.csv', mode = 'r') as file:           # Read wine csv 
     # There are no missing or malformed attribute values for the wine data.
     # We have checked with the dataset information, which confirms this. 
     
+    # Distributions of the positive and negative classes
+    num_wines = len(wine_data)                                  # Number of wines in our data set
+    negative_class = 0                                          # Initialize number of wines with negative rating
+    positive_class = 0                                          # Initialize number of wines with positive rating
+
+    for wine in wine_data:
+        if wine[11] == 0:
+            negative_class += 1
+        else :
+            positive_class +=  1  
+    neg_distribution = negative_class/num_wines                 # Distribution of the negative class
+    pos_distribution = positive_class/num_wines                 # Distribution of the positive class
+
+    print("The distribution of the negative class is: " + str(neg_distribution))
+    print("The distribution of the positive class is: " + str(pos_distribution))
+    print("The distribution is roughly a binomial(1/2) random variable.")
+    print()
+
+    # Average value of features
+    for i in range(0,11):
+        count = 0
+        for wine in wine_data:
+            count += wine[i]
+        feature_average = count/num_wines
+        print("The average value of " + wine_list[0][i] + " is: " + str(feature_average))
+
