@@ -1,2 +1,24 @@
+import numpy as np                                              # Import numpy package
+import csv                                                      # Import csv package
 
-iujdijsijs
+with open('winequality-red.csv', mode = 'r') as file:           # Read wine csv file
+    wine_list = list(csv.reader(file, delimiter=';'))          
+    wine_data = np.array(wine_list[1:], dtype = np.float)       # Load wine data into an array - delete labels
+
+    for wine in wine_data:                                      # Convert quality rating into binary
+        if wine[11] > 5: 
+            wine[11] = 1
+        else: 
+            wine[11] = 0
+    
+    for wine in wine_data:                                      # Check for missing or malformed features
+        if len(wine) != 12:                                     # Check to see if every row has 12 entries
+            print(wine)
+        else:                                                   # If the row has 12 features, check if there is an empty feature 
+            for feature in wine:
+                if feature == '' :
+                    print(wine)
+     
+    # There are no missing or malformed attribute values for the wine data.
+    # We have checked with the dataset information, which confirms this. 
+    
