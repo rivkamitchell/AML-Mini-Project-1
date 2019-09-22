@@ -1,0 +1,28 @@
+import numpy as np
+
+breast_lists=list()
+
+
+for line in open('breast-cancer-wisconsin.data', mode = 'r'):
+	temp=line.split(',')
+	checker=True									            #checks if the line is correct data form (only thing that can go wrong is'?' instead of a data)
+	temp[10]=temp[10][0]							        #removes /n from each line
+	temp2=list()								              #list of itneger that will be added to breast_list
+	for x in temp:
+		if checker:
+			if x[0]!='?':
+				temp2=temp2+[int(x)]
+			else:
+				checker=False
+	if checker:
+		breast_list=breast_list+[temp2]
+
+
+breast_data=np.array(ls, dtype=np.int)			        	#load breast data into aray of integers
+
+
+#Everything is an integer
+#there were 16 missing numbers so deleted the full lines
+#all the rows have 11 entries
+#final array has shape 683x11
+
