@@ -1,28 +1,73 @@
 import numpy as np
 
-breast_lists=list()
-
+breast_list=list()
+set_of_patients=set()
 
 for line in open('breast-cancer-wisconsin.data', mode = 'r'):
+
 	temp=line.split(',')
-	checker=True									            #checks if the line is correct data form (only thing that can go wrong is'?' instead of a data)
-	temp[10]=temp[10][0]							        #removes /n from each line
-	temp2=list()								              #list of itneger that will be added to breast_list
+	checker=True									#checks if the line is correct data form (only thing that can go wrong is'?' instead of a data)
+	temp[10]=temp[10][0]							#removes /n from each line
+	temp2=list()								#list of itneger that will be added to breast_list
 	for x in temp:
-		if checker:
+		if checker:								#checks if the lines are complete
 			if x[0]!='?':
 				temp2=temp2+[int(x)]
 			else:
-				checker=False
-	if checker:
+				checker=False					
+	#print(checker)
+	if checker:										#if line data was complete, we add it to the main list
+		#if temp2[0] in set_of_patients:		
+			#print("Patient measured twice")
+
+		set_of_patients.add(temp2[0])				#
 		breast_list=breast_list+[temp2]
 
 
-breast_data=np.array(ls, dtype=np.int)			        	#load breast data into aray of integers
+
+breast_data=np.array(breast_list, dtype=np.int)				#load breast data into aray of integers
 
 
-#Everything is an integer
+#Every entry is in integer from
+#Some patients are measured twice. Definitely something to do with this
 #there were 16 missing numbers so deleted the full lines
 #all the rows have 11 entries
 #final array has shape 683x11
+#last entry:2 for benign 4 for malignant
+
+
+negative_list=list()							#separating list into benign and malignant cases
+positive_list=list()
+for x in breast_data:
+	if x[10]==2:
+		negative_list+=[x]
+	else:
+		positive_list+=[x]
+total_size= len(negative_list)+len(positive_list)
+
+print()														#calculating distributions
+print()
+print("Out of the " + str(total_size) + " experiments : ")
+print("There are " + str(len(negative_list))+" benign casses")
+print("There are " + str(len(positive_list))+" malignant casses")
+print("So : ")
+print(str(len(negative_list)/total_size) + " benign")
+print(str(len(positive_list)/total_size) + " malignant")
+
+negative_data=np.array(negative_list, dtype=np.int) #negative=benign
+positive_list=np.array(positive_list, dtype=np.int) #positive =malignant
+
+
+print()
+
+#Calculating Mean, Variance, Standard deviation, standard error of each features
+data=breast_data 						#pick ur data, can choose the full set or positive/negative
+mean=np.mean(data, axis=0)					#check these functyions out on numpy!
+var=np.var(data, axis=0)
+std=np.std(data, axis=0)
+print(mean)
+print(var)
+print(std)
+	
+
 
