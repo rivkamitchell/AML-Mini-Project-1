@@ -1,6 +1,5 @@
 import numpy as np                                              # Import numpy package
 import csv                                                      # Import csv package
-import math
 
 # Wine Quality Data Preprocessing
 with open('winequality-red.csv', mode = 'r') as file:           # Read wine csv file
@@ -31,32 +30,20 @@ with open('winequality-red.csv', mode = 'r') as file:           # Read wine csv 
             negative_class += 1
         else :
             positive_class +=  1  
-    neg_distribution = 100%negative_class/num_wines                 # Distribution of the negative class
-    pos_distribution = 100%positive_class/num_wines                 # Distribution of the positive class
+    neg_distribution = 100*(negative_class/num_wines)           # Distribution of the negative class
+    pos_distribution = 100*(positive_class/num_wines)           # Distribution of the positive class
 
     print("The distribution of the negative class is: " + str(neg_distribution) + "%.")
     print("The distribution of the positive class is: " + str(pos_distribution) + "%.")
-    print("The distribution is roughly a binomial(1/2) random variable.")
     print()
 
-    # Mean, variance, standard deviation, and standard error of each feature
-     for i in range(0,11):
-        count_linear= 0
-        count_square = 0
-        for wine in wine_data:
-            count_linear += wine[i]
-        feature_average = count_linear/num_wines
-        print(wine_list[0][i] + ":")
-        print("Mean:" + str(feature_average))
+    # Mean, variance, and standard deviation of each feature
+    mean = np.mean(wine_data, axis = 0)
+    var = np.var(wine_data, axis = 0)
+    std = np.var(wine_data, axis = 0)
 
-        for wine in wine_data:
-            count_square += (wine[i] - feature_average)*(wine[i] - feature_average)
-        feature_variance = count_square/num_wines
-        feature_standarddev = math.sqrt(count_square/(num_wines - 1))
-        feature_standarderr = feature_standarddev/math.sqrt(num_wines)
-        print("Variance: " + str(feature_variance) )
-        print("Standard deviation: " + str(feature_standarddev))
-        print("Standard error: " + str(feature_standarderr))
-        print()
+    print("Means:\n " + str(mean) + '\n')
+    print("Variances:\n " + str(var) + '\n')
+    print("Standard Deviations:\n " + str(std)+ '\n')
 
 
