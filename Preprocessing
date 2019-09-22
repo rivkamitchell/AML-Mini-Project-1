@@ -40,22 +40,23 @@ with open('winequality-red.csv', mode = 'r') as file:           # Read wine csv 
     print()
 
     # Mean, variance, standard deviation, and standard error of each feature
-    for i in range(0,11):
+     for i in range(0,11):
         count_linear= 0
         count_square = 0
         for wine in wine_data:
             count_linear += wine[i]
         feature_average = count_linear/num_wines
-        print("The mean value of " + wine_list[0][i] + " is: " + str(feature_average) + ".")
+        print(wine_list[0][i] + ":")
+        print("Mean:" + str(feature_average))
 
         for wine in wine_data:
             count_square += (wine[i] - feature_average)*(wine[i] - feature_average)
         feature_variance = count_square/num_wines
         feature_standarddev = math.sqrt(count_square/(num_wines - 1))
         feature_standarderr = feature_standarddev/math.sqrt(num_wines)
-        print("The variance of " + wine_list[0][i] + " is: " + str(feature_variance) + ".")
-        print("The standard deviation of " + wine_list[0][i] + " is: " + str(feature_standarddev) + ".")
-        print("The standard error of " + wine_list[0][i] + " is: " + str(feature_standarderr) + ".")
+        print("Variance: " + str(feature_variance) )
+        print("Standard deviation: " + str(feature_standarddev))
+        print("Standard error: " + str(feature_standarderr))
         print()
 
 
