@@ -34,3 +34,20 @@ import numpy as np
 
         return (covariance, means[0], means[1])
     
+    # Predict the class of a wine
+    def predict(x, covariance, means):             # Here x is a mx1 vector
+        neg_mean = means[0][len(x)]
+        pos_mean = means[1][len(x)]
+
+        inv_covariance = np.linalg.inv(covariance)
+
+        log = np.log(pos_mean/neg_mean)
+        x_1 = (1/2)*np.transpose(pos_mean)@inv_covariance@pos_mean
+        x_2 = (1.2)*np.transpose(neg-mean)@inv_covariance@neg_mean
+
+        param = np.transpose(x)@inv_covariance@(pos_mean - neg_mean)
+
+        predict_function = log - x_1 + x_2 + param
+
+        if predict_function > 0: return  1
+        else: return 0
