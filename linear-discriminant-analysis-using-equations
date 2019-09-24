@@ -1,1 +1,36 @@
+import numpy as np
 
+    # Separate the positive and negative classes and remove the quality rating 
+    def separate(X):                          # X: nx(m+1) matrix
+        positive_class = []
+        negative_class = []
+        for x in X: 
+            if X[len(x)] == 0:                                              # Note this is possible with our data sets as we always have feature vectors of a certain length
+                negative_class.append(x[:len(x) - 1])
+            else:
+                positive_class.append(x[:len(x) - 1])
+        return [positive_class, negative_class]
+
+    # Mean vector of the features from classes - might not be super useful
+    def mean(class_1, class_2):
+        return [np.mean(class_1, axis = 0), np.mean(class_2, axis = 0)]
+
+    # Determine covariance
+    def covariance(X):
+        X_neg = separate(X)[0] 
+        X_pos = separate(X)[1]
+
+        X_0 = X_neg - np.mean(X_neg, axis = 0)
+        X_1 = X_pos - np.mean(X_pos, axis = 0)
+
+        covariance = (X_0@np.transpose(X_0) + X_1@np.transpose(X_1))/(len(X_neg) + len(X_pos) - 2)
+        return covariance
+    
+    # Fit function finds the model parameters
+    def fit(X): 
+        separated = separate(X)
+        means = mean(separated[0], separated[1])
+        covariance = covariance(X)
+
+        return (covariance, means[0], means[1])
+    
