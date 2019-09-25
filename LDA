@@ -4,29 +4,23 @@ import requests as recs
 import seaborn as sb
 
 class LDA: 
-	def __init__(self, X, n, m):
-		self.data = X
-		self.features = X[:,:n-1]
-		self.quality = X[:,n-1]
-		(self.pos_probability, self.neg_probability) = self.distributions()
+	def __init__(self, X):
+		(self.num_exp, self.num_features)=X.shape
+		self.data = X #full Data
+		self.features = X[:,:self.num_features-1] #just the features, not the result
+		self.quality = X[:,self.num_features-1] #just the result
 		(self.positive, self.negative, self.pos_count, self.neg_count, self.total) = self.separate()
-
-		self.cov = self.covariance()
+		(self.pos_prob, self.neg_prob)=(self.pos_count/self.total, self.neg_count/self.total)
+		self.cov = self.covariance()#covariance matrix using features
 		self.cov_inv = np.linalg.inv(self.cov)
 		#(self.positive, self.negative, self.pos_count, self.neg_count, self.count) = self.separate()
-	def distributions(self):
-		positive_mean = np.mean(self.data, axis = 0)[len(self.data[0]) - 1]
-		negative_mean = 1 - positive_mean
-		return (positive_mean, negative_mean)
 
 	def separate(self):
-    	
 		positive_class = []
 		negative_class = []
 		num_neg = 0
 		total = 0
 		for x in self.data:
-    		
 			total += 1
 			if x[len(x)-1] == 0: 
 				num_neg += 1
@@ -34,7 +28,7 @@ class LDA:
 			else: positive_class.append(x[:len(x)-1])
 		return (np.array(positive_class), np.array(negative_class), total - num_neg, num_neg, total)
 
-	
+
 	def covariance(self):
 		X_pos = self.positive
 		X_neg = self.negative
@@ -53,14 +47,12 @@ class LDA:
 			array_x = []
 			for y in x: array_x.append(y*x)
 			neg_sum += array_x
-		
-	
+
+
 		for x in X_1: 
-			array_x = []			
-			
+			array_x = []
 			for y in x: 
 				array_x.append(y*x)
-    		
 			neg_sum += array_x	
 		
 		covariance = neg_sum/(len(X_neg) + len(X_pos) - 2)
@@ -69,8 +61,8 @@ class LDA:
 	def fit(self): return (self.covariance, np.mean(self.positive), np.mean(self.negative))
 
 	def predict(self, x):
-    	
-		log = np.log(self.pos_probability/self.neg_probability)
+
+		log = np.log(self.pos_prob/self.neg_prob)
 		
 		pos_mean = np.mean(self.positive, axis = 0)
 		neg_mean = np.mean(self.negative, axis = 0)
@@ -89,7 +81,6 @@ class LDA:
 		fp = 0
 		fn = 0
 		for x in self.data:
-    		
 			if x[len(x) - 1] == 1 and self.predict(x[:len(x) - 1]) == 1: tp += 1
 			elif x[len(x) - 1] == 0 and self.predict(x[:len(x) - 1]) == 0: tn += 1
 			elif x[len(x) - 1] == 0 and self.predict(x[:len(x) - 1]) == 1: fp += 1
@@ -97,10 +88,3 @@ class LDA:
 		
 		return (tp + tn)/(tp + fp + fn + tn)
 
-url_1 ="https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
-wine=pd.read_csv(url_1, sep=";")
-wine['quality'] = wine['quality'].apply(lambda t: 1 if t > 5 else 0)
-wine = np.array(wine)
-
-model = LDA(wine, 12, 1598)
-print(model.accuracy())
