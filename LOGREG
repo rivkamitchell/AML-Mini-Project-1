@@ -1,32 +1,32 @@
 class logRegression:
-	def __init__(self, learnrate, iterations): 						# A simple constructor!
+	def __init__(self, learnrate, iterations): 		 # A simple constructor!
 		self.learnrate = learnrate
 		self.iterations = iterations
 
 
 	def sigmoid(self, w):
-			return (1 / (1 + np.exp(-w)))					          #Making the sigmoid function for Log Regression
+			return (1 / (1 + np.exp(-w)))		 #Making the sigmoid function for Log Regression
 
 	def lossFunction(self, X, y):					
-		return -(np.dot(y.T * log(h), (1-y)*log(1-h)))		#This is the loss function we saw in class
+		return -(np.dot(y.T * log(h), (1-y)*log(1-h)))	 #This is the loss function we saw in class
 
 	def fit(self, X, y):
 		self.weights = np.zeros(X.shape[1])
-		print(self.weights)							              	#initialize weights as a zero array
+		print(self.weights)				 #initialize weights as a zero array
 
 		for i in range(self.iterations):
 			z = np.dot(X, self.weights.T)
-			#print(z)							                       	#take the dot product of input array X and our weight vector
+			#print(z)				 #take the dot product of input array X and our weight vector
 			h = self.sigmoid(z)					          				#run our weighted sum through the sigmoid function
 			#print(h)
-			grad = np.dot(X.T, (y - h))					        	#The gradient we saw in class
+			grad = np.dot(X.T, (y - h))		 #The gradient we saw in class
 
-			self.weights += self.learnrate * grad        	#Modeling the update rule from lecture 4!
+			self.weights += self.learnrate * grad    #Modeling the update rule from lecture 4!
 
-	def pred_prob(self, X):									      		#runs X through sigmoid to get a probability
+	def pred_prob(self, X):					 #runs X through sigmoid to get a probability
 		return self.sigmoid(np.dot(X, self.weights))
 
-	def predictor3000(self, X, threshold):						#if X has probability greater than threshold we get a boolean true babyyyyyy
+	def predictor3000(self, X, threshold):			 #if X has probability greater than threshold we get a boolean true babyyyyyy
 		return self.pred_prob(X) >= threshold
 
 
