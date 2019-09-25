@@ -1,0 +1,26 @@
+import numpy as np 
+import pandas as pd
+
+# TASK 1 - PREPROCESSING
+url_1="https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
+url_2="https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
+
+wine = pd.read_csv(url_1, sep=";")
+wine['quality'] = wine['quality'].apply(lambda t: 1 if t > 5 else 0)
+wine = np.array(wine)
+
+cancer = pd.read_csv(url_2, names=["ID", "Sample code number", "Clump Thickness", "Uniformity of Cell Size", "Uniformity of Cell Shape", "Marginal Adhesion", "Single Epithelial Cell Size", "Bare Nuclei", "Bland Chromatin", "Normal Nucleoli", "Mitoses" ])
+cancer['Mitoses'] = cancer['Mitoses'].apply(lambda t:1 if t == 4 else 0)
+cancer = np.array(cancer) 
+
+# Remove malformed data entries and report the number of malformed entries. 
+count = 0 
+temp = []                             
+for cell in cancer:
+	if '?' in cell: count += 1
+	else:
+		temp.append(cell)
+cancer = np.array(temp, dtype = int)
+cancer = np.unique(cancer, axis = 0)
+
+
