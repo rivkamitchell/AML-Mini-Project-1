@@ -21,6 +21,5 @@ for cell in cancer:
 	else:
 		temp.append(cell)
 cancer = np.array(temp, dtype = int)
-cancer = np.unique(cancer, axis = 0)
 
 
