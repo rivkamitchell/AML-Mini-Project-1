@@ -1,68 +1,75 @@
-import numpy as np:
+import numpy as np
+import pandas as pd
+import requests
+import seaborn as sb
 
 class LDAmodel:
 
 	def __init__(self, X, n, m):
 		#X is an nx(m+1) matrix with (feature matrix | results) AS np object. n rows $m+1 columns so len(X)=n
 		self.data=X
-		self.feature= X[:,:m]
+		self.feature= X[:,:n-1]
 
-		self.result=X[:,m+1]
+		self.result=X[:,n-1]
 
-		self.covariance#we'll have to call a function on this
-		self.positive  #function outputting the positive things
-		self.negative   #function outputting....
-		self.means # vector of total means of features
-		self.means_positive #vector of positive means
-		self.means_negative  #vectore of negative
+		#self.covariance=#we'll have to call a function on this
+		#self.positive  #function outputting the positive things
+		#self.negative   #function outputting....
+		#self.means # vector of total means of features
+		#self.means_positive #vector of positive means
+		#self.means_negative  #vectore of negative
 
 
-		(self.positive, self.negative, self.neg_probability, self.pos_probability, self.total)=self.separate(X)
+		(self.positive, self.negative, self.neg_probability, self.pos_probability, self.total)=self.separate()
 
 
 		#are means really necessary?
 		(self.means, self.means_positive, self.means_negative)=(self.mean(self.feature), self.mean(self.positive), self.mean(self.negative))
 
-		(self.covariance, self.positive....... )=self.fit()
+		self.covariance=self.covariance()
 
-		self.cov_inverse=np.linalg.inv(covariance)
+		self.cov_inverse=np.linalg.inv(self.covariance)
 
 	def separate(self):                          # X: nx(m+1) matrix
-        positive_class = []
-        negative_class = []
-        number_of_neg=0
-        total=0
-        for x in self.data: 
-        	total+=1
-            if x[len(x)] == 0:                                              # Note this is possible with our data sets as we always have feature vectors of a certain length
-                negative_class.append(x[:len(x) - 1])
-                number_of_neg+=1
-            else:
-                positive_class.append(x[:len(x) - 1])
+		positive_class = []
+		negative_class = list()
+		number_of_neg=0
+		total=0
+		for x in self.data: 
+			total+=1
+			if x[len(x)-1] == 0:                                              # Note this is possible with our data sets as we always have feature vectors of a certain length
+				negative_class.append(x[:len(x)-1])
+				number_of_neg+=1
+			else:
+				positive_class.append(x[:len(x)-1]) #remove the results
 
-        return (np.array(positive_class), np.array(negative_class), number_of_neg/total, (total-number_of_neg)/total, total )
+		return (np.array(positive_class), np.array(negative_class), number_of_neg/total, (total-number_of_neg)/total, total )
 
-
-    def mean(self, arr): #numpy array object, returns the means 
-    	return np.mean(arr, axis=0)
+	def mean(self, arr): #numpy array object, returns the means 
+		return np.mean(arr, axis=0)
 
 
         # Determine covariance
-    def covariance(self, X):
-        X_neg = self.negative
-        X_pos = self.positive
+	def covariance(self):
+		X_neg = self.negative
+		X_pos = self.positive
+		ones_neg=np.ones(X_neg.shape[0]*X_neg.shape[1]).reshape(X_neg.shape[0], X_neg.shape[1]) #using matrix mult, not optimal..
+		ones_neg[:,:]=self.means_negative
 
-        ones_neg=np.ones(X_neg.shape[0]) #using matrix mult, not optimal..
-        ones_pos=np.ones(X_pos.shape[0])
+		ones_pos=np.ones(X_pos.shape[0]*X_pos.shape[1]).reshape(X_pos.shape[0], X_pos.shape[1]) 
+		ones_pos[:,:]=self.means_positive
 
-        X_0 = X_neg - np.mean(X_neg, axis = 0)@ones_neg #should be the right dimension: to check!
-        X_1 = X_pos - np.mean(X_pos, axis = 0)@ones_pos
+		#print(ones_neg)
 
+		X_0 = X_neg - ones_neg #should be the right dimension: to check!
+		X_1 = X_pos - ones_pos
 
-        #X time X transpose should be nxn where n is the number of feature
-        covariance = (X_0@np.transpose(X_0) + X_1@np.transpose(X_1))/(len(X_neg) + len(X_pos) - 2)
-        
-        return covariance
+		#print(X_0)
+
+		#print(X_0.shape)
+		#X time X transpose should be nxn where n is the number of feature
+		covariance = (np.transpose(X_0)@X_0 + np.transpose(X_1)@X_1  )/(len(X_neg) + len(X_pos) - 2)
+		return covariance
 
 
 
@@ -73,17 +80,59 @@ class LDAmodel:
 
 	def predict(self, x): #here x is a length m vector or list
 
-		inv_covariance=np.linalg.inv(self.covariance) #or =cov_inverse
+
 		log=np.log(self.pos_probability/self.neg_probability)
-		pos_part=  -(1/2)*np.transpose(self.means_positive)@inv_covariance@means_positive
-		neg_part= -(1/2)*np.transpos(self.means_negative)@inv_covariance@means_negative
 
-		log_ratio=log +pose_part+neg_part + np.transpos(x)@inv_covariance@(means_positive-means_negative)
+		#print(log)
 
+		#print(self.means_positive)
+		#print(np.transpose(self.means_positive))
+		pos_part=  -(1/2)*np.transpose(self.means_positive)@self.cov_inverse@self.means_positive
+		neg_part= (1/2)*np.transpose(self.means_negative)@self.cov_inverse@self.means_negative
+
+		log_ratio=log +pos_part+ neg_part + np.transpose(x)@self.cov_inverse@(self.means_positive-self.means_negative)
+
+		print(log_ratio)
 		if log_ratio>0:
 			return 1
 
 		return 0
 
+url_1="https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data"
+url_2="https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
 
+wine=pd.read_csv(url_2, sep=";")
+breast=pd.read_csv(url_1, names=["ID", "Sample code number", "Clump Thickness", "Uniformity of Cell Size", "Uniformity of Cell Shape", "Marginal Adhesion", "Single Epithelial Cell Size", "Bare Nuclei", "Bland Chromatin", "Normal Nucleoli", "Mitoses" ])
 
+wine['quality']=wine['quality'].apply(lambda t: 1 if t>5 else 0)
+
+wine=np.array(wine)
+
+#print(wine)
+
+model=LDAmodel(wine, 12, 1599 )
+
+#print(model.feature)
+
+#print(model.positive)
+
+print(model.negative)
+
+#print(model.result)
+
+#print(model.means)
+
+#print(model.means_positive)
+
+#print(model.means_negative)
+
+print(model.covariance)
+
+#print(model.negative.shape)
+
+#temp=model.means_negative @ np.transpose(np.ones(12))
+
+#print(temp)
+print(model.positive[1])
+
+print(model.predict(model.positive[10]))
