@@ -11,9 +11,10 @@ class logRegression:
 
 	def lossFunction(self, X, y):					
 		return -(np.dot(y.T * log(h), (1-y)*log(1-h)))			#This is the loss function we saw in class
+		
+	weights = np.zeros(X.Shape[1])						#initialize weights as a zero array
 
 	def fit(self, X, y):
-		weights = np.zeros(X.Shape[1])					#initialize weights as a zero array
                                                     
 		for i in range(self.iterations):
 			z = np.dot(weights.T, X)				#take the dot product of input array X and our weight vector transposed
