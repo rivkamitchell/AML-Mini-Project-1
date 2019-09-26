@@ -13,6 +13,8 @@ class LDA:
 		(self.pos_prob, self.neg_prob)=(self.pos_count/self.total, self.neg_count/self.total)
 		self.cov = self.covariance()#covariance matrix using features
 		self.cov_inv = np.linalg.inv(self.cov)
+
+		self.validation=X
 		#(self.positive, self.negative, self.pos_count, self.neg_count, self.count) = self.separate()
 
 	def separate(self):
@@ -69,22 +71,33 @@ class LDA:
 
 		pos_part = -(1/2)*np.matmul(np.transpose(pos_mean),np.matmul(self.cov_inv, pos_mean))
 		neg_part = (1/2)*np.matmul(np.transpose(neg_mean), np.matmul(self.cov_inv, neg_mean))
-
+		
 		log_ratio = log + pos_part + neg_part + np.matmul(np.transpose(x),np.matmul(self.cov_inv, (pos_mean - neg_mean)))
 
 		if log_ratio > 0: return 1
 		return 0
 	
-	def accuracy(self): 
-		tp = 0
-		tn = 0
-		fp = 0
-		fn = 0
-		for x in self.data:
-			if x[len(x) - 1] == 1 and self.predict(x[:len(x) - 1]) == 1: tp += 1
-			elif x[len(x) - 1] == 0 and self.predict(x[:len(x) - 1]) == 0: tn += 1
-			elif x[len(x) - 1] == 0 and self.predict(x[:len(x) - 1]) == 1: fp += 1
-			elif x[len(x) - 1] == 1 and self.predict(x[:len(x) - 1]) == 0: fn += 1
-		
-		return (tp + tn)/(tp + fp + fn + tn)
+	def accuracy(self, vali): 
+		correct=0
+		wrong=0
+		self.validation=vali
+		for x in vali:
+			if x[-1]==self.predict(x[:len(x)-1]) : correct+=1
+			else: wrong+=1
+
+
+		return (correct)/(correct+wrong)
+
+	def k_fold_crossing(self, k):
+		#assuming k divides the number of experiments. But should b fine otherwise
+		size=int(self.num_exp/k)
+		acc=0
+		for i in range(k):
+			temp1=i*size
+			temp2=(i+1)*size
+			train=np.vstack((self.data[:temp1], self.data[temp2:]))
+			vali=self.data[temp1:temp2]
+			model=LDA(train)
+			acc+=model.accuracy(vali)
+		return (acc/k)
 
