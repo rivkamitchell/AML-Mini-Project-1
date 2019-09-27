@@ -10,30 +10,25 @@ class LOGREG:
         self.classify = X[:,len(X[0])-1]
         self.iterations = iterations
         self.weights = self.fit()
-    def linear_logistic(self, w, x):
-        exp = np.exp(-np.matmul(w,x))
+
+    def linear_logistic(self, w, x):                    # sigmoid function
+        exp = np.exp(-np.dot(x,w))
         return (1/(1+exp))
-    
+
     def error_deriv(self, w):
         error = np.zeros(len(self.features[0]))
         for i in range(len(self.features)):
-            error -= self.features[i]*(self.classify[i] - self.linear_logistic(w, self.features[i]))
+            error += self.features[i]*(self.classify[i] - self.linear_logistic(w, self.features[i]))
         return error
 
     def fit(self):
-        w = np.zeros(len(self.features[0])) + 1
+        w = np.ones(len(self.features[0]))
         for k in range(self.iterations):
-            w_k = w
-            w = w_k - 1/2*self.error_deriv(w_k)
-            norm = math.sqrt(np.dot(w - w_k, w - w_k))
-
-            if norm < 0.05: return w
+            w += (1/(k+1))*self.error_deriv(w)
         return w
     
     def predict(self,x):
-        
         if self.linear_logistic(self.weights, x) > 0.5: return 1
-
         return 0
 
     def accuracy(self):
@@ -47,8 +42,3 @@ class LOGREG:
             elif self.classify[i] == 0 and self.predict(self.features[i]) == 1: fp += 1
             elif self.classify[i] == 1 and self.predict(self.features[i]) == 0: fn += 1
         return (tp + tn)/(tp + fp + fn + tn)
-
-    
-(wine, cancer) = Preprocessing.data()
-model = LOGREG(cancer, 100)
-print(model.accuracy())
