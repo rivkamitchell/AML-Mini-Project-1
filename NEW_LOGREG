@@ -35,7 +35,6 @@ class LOGREG:
         for k in range(self.iterations):
             error=self.learning_rate(k)*self.error_deriv(w)
             w += error
-            print(np.sqrt(np.dot(error, error)))
             if np.sqrt(np.dot(error, error))<self.epsilon:
                 return w
         return w
