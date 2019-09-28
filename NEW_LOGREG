@@ -6,10 +6,12 @@ class LOGREG:
 
     def __init__(self, X, iterations):
         self.data = X
+        (self.num_exp, self.num_features)=X.shape
         self.features = np.transpose(np.vstack((np.ones(len(self.data)), np.transpose(X[:,:len(X[0])-1]))))
         self.classify = X[:,len(X[0])-1]
         self.iterations = iterations
         self.weights = self.fit()
+        self.validation=X
 
     def linear_logistic(self, w, x):                    # sigmoid function
         exp = np.exp(-np.dot(x,w))
@@ -19,6 +21,7 @@ class LOGREG:
         error = np.zeros(len(self.features[0]))
         for i in range(len(self.features)):
             error += self.features[i]*(self.classify[i] - self.linear_logistic(w, self.features[i]))
+        
         return error
 
     def fit(self):
@@ -31,14 +34,25 @@ class LOGREG:
         if self.linear_logistic(self.weights, x) > 0.5: return 1
         return 0
 
-    def accuracy(self):
-        tp = 0
-        tn = 0
-        fp = 0
-        fn = 0
-        for i in range(len(self.data)):
-            if self.classify[i] == 1 and self.predict(self.features[i]) == 1: tp += 1
-            elif self.classify[i] == 0 and self.predict(self.features[i]) == 0: tn += 1
-            elif self.classify[i] == 0 and self.predict(self.features[i]) == 1: fp += 1
-            elif self.classify[i] == 1 and self.predict(self.features[i]) == 0: fn += 1
-        return (tp + tn)/(tp + fp + fn + tn)
+    def accuracy(self, vali):
+        tr = 0 #number of right predictions
+        tw = 0 #number of wrong predictions
+        self.validation=vali
+
+        for i in range(len(self.validation)):
+            if self.classify[i]==self.predict(self.features[i]) :tr+=1
+            else: tw+=1
+        return (tr/(tw+tr))
+
+    def k_fold_crossing(self, k):
+        #assuming k divides the number of experiments. But should b fine otherwise
+        size=int(self.num_exp/k)
+        acc=0
+        for i in range(k):
+            temp1=i*size
+            temp2=(i+1)*size
+            train=np.vstack((self.data[:temp1], self.data[temp2:]))
+            vali=self.data[temp1:temp2]
+            model=LOGREG(train, self.iterations)
+            acc+=model.accuracy(vali)
+        return (acc/k)
