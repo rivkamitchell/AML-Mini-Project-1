@@ -1,0 +1,25 @@
+import numpy as np
+import pandas as pd
+import requests as recs
+import seaborn as sb
+import newlogreg
+import Preprocessing
+import LDAEdit
+import itertools
+
+
+
+(cancer, wine)=Preprocessing.data()
+
+
+
+
+
+cancer_new=np.delete(cancer, (0,1), axis=1)
+
+
+
+model=newlogreg.LOGREG(cancer_new, 1000, 0.01,  lambda k: 1/(k+1))
+
+print(model.accuracy(cancer_new))
+
