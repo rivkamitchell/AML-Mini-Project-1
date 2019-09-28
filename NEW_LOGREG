@@ -4,14 +4,21 @@ import Preprocessing
 
 class LOGREG:
 
-    def __init__(self, X, iterations):
+    def __init__(self, X, iterations, epsilon, learning_rate):
+        X=np.array(X)
+        X=np.insert(X, 0,  np.ones(len(X)), axis=1)
         self.data = X
         (self.num_exp, self.num_features)=X.shape
-        self.features = np.transpose(np.vstack((np.ones(len(self.data)), np.transpose(X[:,:len(X[0])-1]))))
+        self.features = X[:,:len(X[0])-1]
         self.classify = X[:,len(X[0])-1]
         self.iterations = iterations
+        self.learning_rate=learning_rate
+        self.epsilon=epsilon
         self.weights = self.fit()
         self.validation=X
+
+
+
 
     def linear_logistic(self, w, x):                    # sigmoid function
         exp = np.exp(-np.dot(x,w))
@@ -21,13 +28,16 @@ class LOGREG:
         error = np.zeros(len(self.features[0]))
         for i in range(len(self.features)):
             error += self.features[i]*(self.classify[i] - self.linear_logistic(w, self.features[i]))
-        
         return error
 
     def fit(self):
         w = np.ones(len(self.features[0]))
         for k in range(self.iterations):
-            w += (1/(k+1))*self.error_deriv(w)
+            error=self.learning_rate(k)*self.error_deriv(w)
+            w += error
+            print(np.sqrt(np.dot(error, error)))
+            if np.sqrt(np.dot(error, error))<self.epsilon:
+                return w
         return w
     
     def predict(self,x):
@@ -56,3 +66,6 @@ class LOGREG:
             model=LOGREG(train, self.iterations)
             acc+=model.accuracy(vali)
         return (acc/k)
+        
+
+        
